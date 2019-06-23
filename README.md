@@ -1,4 +1,4 @@
-# LibRTab
+# LibRIB
 
 Developed by Christian Visintin
 
