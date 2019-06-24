@@ -33,21 +33,31 @@ typedef struct RIB {
   size_t entries;
 } RIB;
 
+typedef enum RIB_ret_code_t {
+  RIB_NO_ERROR,
+  RIB_INVALID_ADDRESS,
+  RIB_NO_MATCH,
+  RIB_DUP_RECORD,
+  RIB_NOT_EXISTS,
+  RIB_UNINITIALIZED_RIB,
+  RIB_BAD_ALLOC
+} RIB_ret_code_t;
+
 // Functions
 
 // Table manipulation functions 
-RIB* RIB_init();
-int RIB_free(RIB* rtab);
-int RIB_add(RIB* rtab, const char* destination, const char* netmask, const char* gateway, const char* iface, int metric);
-int RIB_delete(RIB* rtab, const char* destination);
-int RIB_update(RIB* rtab, const char* destination, const char* newDestination, const char* newNetmask, const char* newGateway, const char* newIface, int newMetric);
-int RIB_clear(RIB* rtab);
+RIB_ret_code_t RIB_init(RIB* rtab);
+RIB_ret_code_t RIB_free(RIB* rtab);
+RIB_ret_code_t RIB_add(RIB* rtab, const char* destination, const char* netmask, const char* gateway, const char* iface, int metric);
+RIB_ret_code_t RIB_delete(RIB* rtab, const char* destination);
+RIB_ret_code_t RIB_update(RIB* rtab, const char* destination, const char* newDestination, const char* newNetmask, const char* newGateway, const char* newIface, int newMetric);
+RIB_ret_code_t RIB_clear(RIB* rtab);
 
 // Table querying functions
 
-Route* RIB_find(RIB* rtab, const char* networkAddr);
-Route* RIB_match(RIB* rtab, const char* destination);
-Route* RIB_match_ipv4(RIB* rtab, const char* destination);
-Route* RIB_match_ipv6(RIB* rtab, const char* destination);
+RIB_ret_code_t RIB_find(RIB* rtab, const char* networkAddr, Route* route);
+RIB_ret_code_t RIB_match(RIB* rtab, const char* destination, Route* route);
+RIB_ret_code_t RIB_match_ipv4(RIB* rtab, const char* destination, Route* route);
+RIB_ret_code_t RIB_match_ipv6(RIB* rtab, const char* destination, Route* route);
 
 #endif
