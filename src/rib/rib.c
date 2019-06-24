@@ -83,15 +83,15 @@ int RIB_free(RIB* rtab) {
  * @function RIB_add
  * @description add new entry to the routing table
  * @param RIB* routing table
- * @param char* destination
- * @param char* netmask
- * @param char* gateway
- * @param char* iface
+ * @param const char* destination
+ * @param const char* netmask
+ * @param const char* gateway
+ * @param const char* iface
  * @param int metric
  * @returns int: 0 if add operation succeeded
  */
 
-int RIB_add(RIB* rtab, char* destination, char* netmask, char* gateway, char* iface, int metric) {
+int RIB_add(RIB* rtab, const char* destination, const char* netmask, const char* gateway, const char* iface, int metric) {
   if (rtab == NULL) {
     return 1;
   }
@@ -112,7 +112,7 @@ int RIB_add(RIB* rtab, char* destination, char* netmask, char* gateway, char* if
   //check if an entry for provided destination already exists
   for (size_t i = 0; i < rtab->entries; i++) {
     Route* thisRoute = rtab->routes[i];
-    if (strcmp(thisRoute->destination, destination) == 0) {
+    if (compareIPv4Addresses(thisRoute->destination, destination) == 0) {
       return 1;
     }
   }
@@ -120,19 +120,21 @@ int RIB_add(RIB* rtab, char* destination, char* netmask, char* gateway, char* if
   Route* newRoute = (Route*) malloc(sizeof(Route));
   //Copy to new route struct the attributes passed as arguments
   newRoute->destination = (char*) malloc(sizeof(char) * (strlen(destination) + 1));
-  strncpy(newRoute->destination, destination, strlen(destination));
-  newRoute->destination[strlen(destination)] = 0x00;
+  strcpy(newRoute->destination, destination);
   newRoute->netmask = (char*) malloc(sizeof(char) * (strlen(netmask) + 1));
-  strncpy(newRoute->netmask, netmask, strlen(netmask));
-  newRoute->netmask[strlen(netmask)] = 0x00;
+  strcpy(newRoute->netmask, netmask);
   newRoute->gateway = (char*) malloc(sizeof(char) * (strlen(gateway) + 1));
-  strncpy(newRoute->gateway, gateway, strlen(gateway));
-  newRoute->gateway[strlen(gateway)] = 0x00;
+  strcpy(newRoute->gateway, gateway);
   newRoute->iface = (char*) malloc(sizeof(char) * (strlen(iface) + 1));
-  strncpy(newRoute->iface, iface, strlen(iface));
-  newRoute->iface[strlen(iface)] = 0x00;
+  strcpy(newRoute->iface, iface);
   newRoute->metric = metric;
   newRoute->ipv = ipVersion;
+  //Format addresses
+  if (newRoute->ipv == 4) {
+    formatIPv4Address(&newRoute->destination);
+    formatIPv4Address(&newRoute->netmask);
+    formatIPv4Address(&newRoute->gateway);
+  }
   //Increment entries
   rtab->entries++;
   //Allocate new route and store it into routing table
@@ -145,11 +147,11 @@ int RIB_add(RIB* rtab, char* destination, char* netmask, char* gateway, char* if
  * @function RIB_delete
  * @description delete an entry from the routing table
  * @param RIB*
- * @param char* destination to remove
+ * @param const char* destination to remove
  * @returns int: 0 if succeeded
  */
 
-int RIB_delete(RIB* rtab, char* destination) {
+int RIB_delete(RIB* rtab, const char* destination) {
   if (rtab == NULL) {
     return 1;
   }
@@ -159,7 +161,7 @@ int RIB_delete(RIB* rtab, char* destination) {
   //Iterate over routing table to find the destination to remove
   for (size_t i = 0; i < rtab->entries; i++) {
     Route* thisRoute = rtab->routes[i];
-    if (strcmp(thisRoute->destination, destination) == 0) {
+    if (compareIPv4Addresses(thisRoute->destination, destination) == 0) {
       //We found it!
       size_t currIndex = i;
       //Delete element
@@ -196,11 +198,11 @@ int RIB_delete(RIB* rtab, char* destination) {
  * @function RIB_find
  * @description find a Route with provided network address in provided route table
  * @param RIB*
- * @param char*
+ * @param const char*
  * @returns Route*
  */
 
-Route* RIB_find(RIB* rtab, char* networkAddr) {
+Route* RIB_find(RIB* rtab, const char* networkAddr) {
   if (rtab == NULL) {
     return NULL;
   }
@@ -209,7 +211,7 @@ Route* RIB_find(RIB* rtab, char* networkAddr) {
   }
   for (size_t i = 0; i < rtab->entries; i++) {
     Route* thisRoute = rtab->routes[i];
-    if (strcmp(thisRoute->destination, networkAddr) == 0) {
+    if (compareIPv4Addresses(thisRoute->destination, networkAddr) == 0) {
       return thisRoute;
     }
   }
@@ -220,11 +222,11 @@ Route* RIB_find(RIB* rtab, char* networkAddr) {
  * @function RIB_match
  * @description find a matching route for the provided destination address; Longest prefix match is used in case of ambiguity; supports both ipv4 and ipv6
  * @param RIB*
- * @param char* destination
+ * @param const char* destination
  * @returns Route*, NULL if none is found
  */
 
-Route* RIB_match(RIB* rtab, char* destination) {
+Route* RIB_match(RIB* rtab, const char* destination) {
   int ipVersion;
   //Check whether destination is valid
   if (isValidIpAddress(destination, &ipVersion) != 0) {
@@ -244,11 +246,11 @@ Route* RIB_match(RIB* rtab, char* destination) {
  * @function RIB_match_ipv4
  * @description find a matching route for the provided ipv4 destination address; Longest prefix match is used in case of ambiguity
  * @param RIB*
- * @param char* destination
+ * @param const char* destination
  * @returns Route*, NULL if none is found
  */
 
-Route* RIB_match_ipv4(RIB* rtab, char* destination) {
+Route* RIB_match_ipv4(RIB* rtab, const char* destination) {
   //Iterate over routing table in order to find a suitable route
   if (rtab == NULL) {
     return NULL;
@@ -263,7 +265,7 @@ Route* RIB_match_ipv4(RIB* rtab, char* destination) {
     //Find the network address with the provided address and check if they match
     char* thisNetaddr = getIpv4NetworkAddress(destination, thisRoute->netmask);
     //Check if they match
-    if (strcmp(thisNetaddr, thisRoute->destination) == 0) {
+    if (compareIPv4Addresses(thisNetaddr, thisRoute->destination) == 0) {
       //They match! 
       if (nextHop == NULL) {
         //Set immediately this route as next hop

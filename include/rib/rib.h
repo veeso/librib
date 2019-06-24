@@ -38,14 +38,14 @@ typedef struct RIB {
 // Table manipulation functions 
 RIB* RIB_init();
 int RIB_free(RIB* rtab);
-int RIB_add(RIB* rtab, char* destination, char* netmask, char* gateway, char* iface, int metric);
-int RIB_delete(RIB* rtab, char* destination);
+int RIB_add(RIB* rtab, const char* destination, const char* netmask, const char* gateway, const char* iface, int metric);
+int RIB_delete(RIB* rtab, const char* destination);
 
 // Table querying functions
 
-Route* RIB_find(RIB* rtab, char* networkAddr);
-Route* RIB_match(RIB* rtab, char* destination);
-Route* RIB_match_ipv4(RIB* rtab, char* destination);
-Route* RIB_match_ipv6(RIB* rtab, char* destination);
+Route* RIB_find(RIB* rtab, const char* networkAddr);
+Route* RIB_match(RIB* rtab, const char* destination);
+Route* RIB_match_ipv4(RIB* rtab, const char* destination);
+Route* RIB_match_ipv6(RIB* rtab, const char* destination);
 
 #endif

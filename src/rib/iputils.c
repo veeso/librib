@@ -32,7 +32,7 @@
  * @returns int: 0 if valid
  */
 
-int isValidIpAddress(char *ipAddr, int* ipv) {
+int isValidIpAddress(const char *ipAddr, int* ipv) {
   int ipVersion = 0;
   struct addrinfo hint, *res = NULL;
   memset(&hint, '\0', sizeof hint);
@@ -63,7 +63,7 @@ int isValidIpAddress(char *ipAddr, int* ipv) {
  * @returns int
  */
 
-int getCIDRnetmask(char *netmask) {
+int getCIDRnetmask(const char *netmask) {
   //Copy tmp copy for tokenization
   size_t netmaskLen = strlen(netmask);
   char* tmpNetmask = (char*) malloc(sizeof(char) * (netmaskLen + 1));
@@ -128,7 +128,7 @@ int getCIDRnetmask(char *netmask) {
  * @returns char*
  */
 
-char* getIpv4NetworkAddress(char* ipAddress, char* netmask) {
+char* getIpv4NetworkAddress(const char* ipAddress, const char* netmask) {
   char* networkAddress = NULL;
   //Create tmp copy for tokenization
   size_t ipLen = strlen(ipAddress);
@@ -168,4 +168,54 @@ char* getIpv4NetworkAddress(char* ipAddress, char* netmask) {
   memset(networkAddress, 0x00, maxAddrLength);
   sprintf(networkAddress, "%d.%d.%d.%d", networkAddrBytes[0], networkAddrBytes[1], networkAddrBytes[2], networkAddrBytes[3]);
   return networkAddress;
+}
+
+/**
+ * @function formatIPv4Address
+ * @description format an address to a correct ipv4 format (e.g. 010.008.000.001 => 10.8.0.1)
+ * @param char**
+ */
+
+void formatIPv4Address(char** ipAddress) {
+  size_t newAddrSize = 3; //3 dots
+  int ipBytes[4];
+  char* ipToken = strtok(*ipAddress, ".");
+  for (int i = 0; ipToken && i < 4; i++) {
+    ipBytes[i] = atoi(ipToken);
+    if (ipBytes[i] < 10) {
+      newAddrSize++;
+    } else if (ipBytes[i] < 100) {
+      newAddrSize += 2;
+    } else {
+      newAddrSize += 3;
+    }
+    ipToken = strtok(NULL, ".");
+  }
+  *ipAddress = (char*) realloc(*ipAddress, sizeof(char) * (newAddrSize + 1));
+  sprintf(*ipAddress, "%d.%d.%d.%d", ipBytes[0], ipBytes[1], ipBytes[2], ipBytes[3]);
+}
+
+/**
+ * @function compareIPv4Addresses
+ * @description compare two ipv4 addresses and returns if they're equal or not
+ * @param char*
+ * @param char*
+ * @returns int: 0 if they're equal
+ */
+
+int compareIPv4Addresses(const char* ipAddress, const char* cmpIpAddress) {
+  //Allocate temporary ip address to compare them
+  char* ipAddr1 = (char*) malloc(sizeof(char) * (strlen(ipAddress) + 1));
+  strcpy(ipAddr1, ipAddress);
+  char* ipAddr2 = (char*) malloc(sizeof(char) * (strlen(cmpIpAddress) + 1));
+  strcpy(ipAddr2, cmpIpAddress);
+  //Format them
+  formatIPv4Address(&ipAddr1);
+  formatIPv4Address(&ipAddr2);
+  //Check if they're equal
+  int ret = strcmp(ipAddr1, ipAddr2);
+  //Free previously allocated temporary addresses
+  free(ipAddr1);
+  free(ipAddr2);
+  return ret;
 }

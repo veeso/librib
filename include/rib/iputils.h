@@ -24,9 +24,11 @@
 #ifndef IPUTILS_H
 #define IPTUILS_H
 
-int isValidIpAddress(char* ipAddr, int* ipv);
-int getCIDRnetmask(char* netmask);
-char* getIpv4NetworkAddress(char* ipAddress, char* netmask);
+int isValidIpAddress(const char* ipAddr, int* ipv);
+int getCIDRnetmask(const char* netmask);
+char* getIpv4NetworkAddress(const char* ipAddress, const char* netmask);
+void formatIPv4Address(char** ipAddress);
+int compareIPv4Addresses(const char* ipAddress, const char* cmpIpAddress);
 //char* getMinHostAddr(char* networkAddr, char* netmask);
 //char* getMaxHostAddr(char* networkAddr, char* netmask);
 //char* getBroadcastAddr(char* networkAddr, char* netmask);
