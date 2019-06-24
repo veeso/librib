@@ -40,6 +40,8 @@ RIB* RIB_init();
 int RIB_free(RIB* rtab);
 int RIB_add(RIB* rtab, const char* destination, const char* netmask, const char* gateway, const char* iface, int metric);
 int RIB_delete(RIB* rtab, const char* destination);
+int RIB_update(RIB* rtab, const char* destination, const char* newDestination, const char* newNetmask, const char* newGateway, const char* newIface, int newMetric);
+int RIB_clear(RIB* rtab);
 
 // Table querying functions
 
