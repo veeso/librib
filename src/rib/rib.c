@@ -124,17 +124,20 @@ RIB_ret_code_t RIB_add(RIB* rtab, const char* destination, const char* netmask, 
   //Allocate space for the new record
   newRoute->destination = (char*) malloc(sizeof(char) * (strlen(destination) + 1));
   if (newRoute->destination == NULL) {
+    free(newRoute);
     return RIB_BAD_ALLOC;
   }
   newRoute->netmask = (char*) malloc(sizeof(char) * (strlen(netmask) + 1));
   if (newRoute->netmask == NULL) {
     free(newRoute->destination);
+    free(newRoute);
     return RIB_BAD_ALLOC;
   }
   newRoute->gateway = (char*) malloc(sizeof(char) * (strlen(gateway) + 1));
   if (newRoute->netmask == NULL) {
     free(newRoute->destination);
     free(newRoute->netmask);
+    free(newRoute);
     return RIB_BAD_ALLOC;
   }
   newRoute->iface = (char*) malloc(sizeof(char) * (strlen(iface) + 1));
@@ -142,6 +145,7 @@ RIB_ret_code_t RIB_add(RIB* rtab, const char* destination, const char* netmask, 
     free(newRoute->destination);
     free(newRoute->netmask);
     free(newRoute->gateway);
+    free(newRoute);
     return RIB_BAD_ALLOC;
   }
   //Copy to new route struct the attributes passed as arguments
@@ -162,6 +166,7 @@ RIB_ret_code_t RIB_add(RIB* rtab, const char* destination, const char* netmask, 
   //Allocate new route and store it into routing table
   rtab->routes = (Route**) realloc(rtab->routes, sizeof(Route*) * rtab->entries);
   if (rtab->routes == NULL) {
+    free(newRoute);
     return RIB_BAD_ALLOC;
   }
   rtab->routes[rtab->entries - 1] = newRoute;
@@ -232,12 +237,11 @@ RIB_ret_code_t RIB_delete(RIB* rtab, const char* destination) {
  * @param const char*
  * @param const char*
  * @param const char*
- * @param const char*
  * @param int
  * @returns RIB_ret_code_t
  */
 
-RIB_ret_code_t RIB_update(RIB* rtab, const char* destination, const char* newDestination, const char* newNetmask, const char* newGateway, const char* newIface, int newMetric) {
+RIB_ret_code_t RIB_update(RIB* rtab, const char* destination, const char* newNetmask, const char* newGateway, const char* newIface, int newMetric) {
   if (rtab == NULL) {
     return RIB_UNINITIALIZED_RIB;
   }
@@ -246,9 +250,6 @@ RIB_ret_code_t RIB_update(RIB* rtab, const char* destination, const char* newDes
   }
   //Check if passed arguments are valid
   int ipVersion;
-  if (isValidIpAddress(newDestination, &ipVersion) != 0) {
-    return RIB_INVALID_ADDRESS;
-  }
   if (isValidIpAddress(newNetmask, NULL) != 0) {
     return RIB_INVALID_ADDRESS;
   }
@@ -258,31 +259,18 @@ RIB_ret_code_t RIB_update(RIB* rtab, const char* destination, const char* newDes
   if (ipVersion != 4 && ipVersion != 6) {
     return RIB_INVALID_ADDRESS;
   }
-  //check if an entry for provided destination already exists
-  for (size_t i = 0; i < rtab->entries; i++) {
-    Route* thisRoute = rtab->routes[i];
-    if (compareIPv4Addresses(thisRoute->destination, newDestination) == 0) {
-      return RIB_DUP_RECORD;
-    }
-  }
   //Iterate over routing table to find the destination to update
   for (size_t i = 0; i < rtab->entries; i++) {
     Route* thisRoute = rtab->routes[i];
     if (compareIPv4Addresses(thisRoute->destination, destination) == 0) {
       //We found it
       //Allocate space for the new record
-      thisRoute->destination = (char*) realloc(thisRoute->destination, sizeof(char) * (strlen(newDestination) + 1));
-      if (thisRoute->destination == NULL) {
-        free(thisRoute->netmask);
-        free(thisRoute->gateway);
-        free(thisRoute->iface);
-        return RIB_BAD_ALLOC;
-      }
       thisRoute->netmask = (char*) realloc(thisRoute->netmask, sizeof(char) * (strlen(newNetmask) + 1));
       if (thisRoute->netmask == NULL) {
         free(thisRoute->destination);
         free(thisRoute->gateway);
         free(thisRoute->iface);
+        free(thisRoute);
         return RIB_BAD_ALLOC;
       }
       thisRoute->gateway = (char*) realloc(thisRoute->gateway, sizeof(char) * (strlen(newGateway) + 1));
@@ -290,6 +278,7 @@ RIB_ret_code_t RIB_update(RIB* rtab, const char* destination, const char* newDes
         free(thisRoute->destination);
         free(thisRoute->netmask);
         free(thisRoute->iface);
+        free(thisRoute);
         return RIB_BAD_ALLOC;
       }
       thisRoute->iface = (char*) realloc(thisRoute->iface, sizeof(char) * (strlen(newIface) + 1));
@@ -297,18 +286,17 @@ RIB_ret_code_t RIB_update(RIB* rtab, const char* destination, const char* newDes
         free(thisRoute->destination);
         free(thisRoute->netmask);
         free(thisRoute->gateway);
+        free(thisRoute);
         return RIB_BAD_ALLOC;
       }
       thisRoute->metric = newMetric;
       thisRoute->ipv = ipVersion;
       //Copy to new route struct the attributes passed as arguments
-      strcpy(thisRoute->destination, destination);
       strcpy(thisRoute->netmask, newNetmask);
       strcpy(thisRoute->gateway, newGateway);
       strcpy(thisRoute->iface, newIface);
       //Format addresses
       if (thisRoute->ipv == 4) {
-        formatIPv4Address(&thisRoute->destination);
         formatIPv4Address(&thisRoute->netmask);
         formatIPv4Address(&thisRoute->gateway);
       }

@@ -50,7 +50,7 @@ RIB_ret_code_t RIB_init(RIB* rtab);
 RIB_ret_code_t RIB_free(RIB* rtab);
 RIB_ret_code_t RIB_add(RIB* rtab, const char* destination, const char* netmask, const char* gateway, const char* iface, int metric);
 RIB_ret_code_t RIB_delete(RIB* rtab, const char* destination);
-RIB_ret_code_t RIB_update(RIB* rtab, const char* destination, const char* newDestination, const char* newNetmask, const char* newGateway, const char* newIface, int newMetric);
+RIB_ret_code_t RIB_update(RIB* rtab, const char* destination, const char* newNetmask, const char* newGateway, const char* newIface, int newMetric);
 RIB_ret_code_t RIB_clear(RIB* rtab);
 
 // Table querying functions
