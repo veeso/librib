@@ -33,6 +33,9 @@
  */
 
 int isValidIpAddress(const char *ipAddr, int* ipv) {
+  if (ipAddr == NULL) {
+    return 1;
+  }
   int ipVersion = 0;
   struct addrinfo hint, *res = NULL;
   memset(&hint, '\0', sizeof hint);
