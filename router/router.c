@@ -45,10 +45,10 @@
 
 #define USAGE_QUIT "QUIT"
 #define USAGE_ADD "ADD <networkAddr> <netmask> <gateway> <iface> <metric> - add a new record in the routing table"
-#define USAGE_DEL "DELETE <networkAddr> - delete a record in the routing table"
-#define USAGE_UPD "UPDATE <networkAddr> <newNetmask> <newGateway> <newIface> <newMetric> - update a record in the routing table"
+#define USAGE_DEL "DELETE <networkAddr> <netmask/*> - delete a record in the routing table"
+#define USAGE_UPD "UPDATE <networkAddr> <netmask> <newNetmask> <newGateway> <newIface> <newMetric> - update a record in the routing table"
 #define USAGE_CLR "CLEAR - clear routing table"
-#define USAGE_SLT "SELECT <networkAddr> - retrieve routing information for a network address"
+#define USAGE_SLT "SELECT <networkAddr> <netmask/*> - retrieve routing information for a network address"
 #define USAGE_ROT "ROUTE <destination> - find gateway for the provided destination"
 #define USAGE_DMP "DUMP - dump all the records in the routing table"
 #define USAGE_CMT "COMMIT - commit changes to the routing table"
@@ -150,7 +150,11 @@ int commitRoutingTable(RIB* rtab, char* filename) {
   return 0;
 }
 
-RIB_ret_code_t addCommand(RIB* rtab, char* argv) {
+void printRoute(const Route* r) {
+  printf("%s\t%s\t%s\t%s\t%d\n", r->destination, r->netmask, r->gateway, r->iface, r->metric);
+}
+
+RIB_ret_code_t command_add(RIB* rtab, char* argv) {
   const int args = 5;
   char* arg = strtok(argv, " ");
   //Define data
@@ -159,7 +163,8 @@ RIB_ret_code_t addCommand(RIB* rtab, char* argv) {
   char* gateway = NULL;
   char* iface = NULL;
   int metric = 0;
-  for (int argIndex = 0; arg != NULL; argIndex++) {
+  int argIndex;
+  for (argIndex = 0; arg != NULL; argIndex++) {
     switch (argIndex) {
       case 0: {
         destination = (char*) malloc(sizeof(char) * (strlen(arg) + 1));
@@ -188,6 +193,9 @@ RIB_ret_code_t addCommand(RIB* rtab, char* argv) {
     }
     arg = strtok(NULL, " ");
   }
+  if (argIndex != 5) {
+    printf("%s\n", USAGE_ADD);
+  }
   //Abort in case there are missing arguments
   if (destination == NULL) {
     return RIB_INVALID_ADDRESS;
@@ -211,6 +219,175 @@ RIB_ret_code_t addCommand(RIB* rtab, char* argv) {
   return RIB_add(rtab, destination, netmask, gateway, iface, metric);
 }
 
+RIB_ret_code_t command_delete(RIB* rtab, char* argv) {
+  char* destination = NULL;
+  char* netmask = NULL;
+  char* arg = strtok(argv, " ");
+  const int args = 2;
+  int argIndex;
+  for (argIndex = 0; arg != NULL; argIndex++) {
+    switch (argIndex) {
+      case 0: {
+        destination = (char*) malloc(sizeof(char) * (strlen(arg) + 1));
+        strcpy(destination, arg);
+        break;
+      }
+      case 1: {
+        netmask = (char*) malloc(sizeof(char) * (strlen(arg) + 1));
+        strcpy(netmask, arg);
+        break;
+      }
+    }
+    arg = strtok(NULL, " ");
+  }
+  if (argIndex < args) {
+    printf("%s\n", USAGE_DEL);
+  }
+  if (destination == NULL) {
+    return RIB_INVALID_ADDRESS;
+  }
+  if (netmask == NULL) {
+    free(destination);
+    return RIB_INVALID_ADDRESS;
+  }
+  return RIB_delete(rtab, destination, netmask);
+}
+
+RIB_ret_code_t command_update(RIB* rtab, char* argv) {
+  const int args = 6;
+  char* arg = strtok(argv, " ");
+  //Define data
+  char* destination = NULL;
+  char* netmask = NULL;
+  char* newNetmask = NULL;
+  char* gateway = NULL;
+  char* iface = NULL;
+  int metric = 0;
+  int argIndex;
+  for (argIndex = 0; arg != NULL; argIndex++) {
+    switch (argIndex) {
+      case 0: {
+        destination = (char*) malloc(sizeof(char) * (strlen(arg) + 1));
+        strcpy(destination, arg);
+        break;
+      }
+      case 1: {
+        netmask = (char*) malloc(sizeof(char) * (strlen(arg) + 1));
+        strcpy(netmask, arg);
+        break;
+      }
+      case 2: {
+        newNetmask = (char*) malloc(sizeof(char) * (strlen(arg) + 1));
+        strcpy(newNetmask, arg);
+        break;
+      }
+      case 3: {
+        gateway = (char*) malloc(sizeof(char) * (strlen(arg) + 1));
+        strcpy(gateway, arg);
+        break;
+      }
+      case 4: {
+        iface = (char*) malloc(sizeof(char) * (strlen(arg) + 1));
+        strcpy(iface, arg);
+        break;
+      }
+      case 5: {
+        metric = atoi(arg);
+        break;
+      }
+    }
+    arg = strtok(NULL, " ");
+  }
+  if (argIndex < args) {
+    printf("%s\n", USAGE_ADD);
+  }
+  //Abort in case there are missing arguments
+  if (destination == NULL) {
+    return RIB_INVALID_ADDRESS;
+  }
+  if (netmask == NULL) {
+    free(destination);
+    return RIB_INVALID_ADDRESS;
+  }
+  if (gateway == NULL) {
+    free(destination);
+    free(netmask);
+    return RIB_INVALID_ADDRESS;
+  }
+  if (iface == NULL) {
+    free(destination);
+    free(netmask);
+    free(iface);
+    return RIB_INVALID_ADDRESS;
+  }
+  //Add route
+  return RIB_update(rtab, destination, netmask, newNetmask, gateway, iface, metric);
+}
+
+RIB_ret_code_t command_clear(RIB* rtab, char* argv) {
+  return RIB_clear(rtab);
+}
+
+RIB_ret_code_t command_select(RIB* rtab, char* argv) {
+  char* destination = NULL;
+  char* netmask = NULL;
+  char* arg = strtok(argv, " ");
+  const int args = 2;
+  int argIndex;
+  for (argIndex = 0; arg != NULL; argIndex++) {
+    switch (argIndex) {
+      case 0: {
+        destination = (char*) malloc(sizeof(char) * (strlen(arg) + 1));
+        strcpy(destination, arg);
+        break;
+      }
+      case 1: {
+        netmask = (char*) malloc(sizeof(char) * (strlen(arg) + 1));
+        strcpy(netmask, arg);
+        break;
+      }
+    }
+    arg = strtok(NULL, " ");
+  }
+  if (argIndex < args) {
+    printf("%s\n", USAGE_SLT);
+  }
+  if (destination == NULL) {
+    return RIB_INVALID_ADDRESS;
+  }
+  if (netmask == NULL) {
+    free(destination);
+    return RIB_INVALID_ADDRESS;
+  }
+  Route* result = NULL;
+  RIB_ret_code_t rc = RIB_find(rtab, destination, netmask, &result);
+  if (rc == RIB_NO_ERROR) {
+    printRoute(result);
+  }
+  return rc;
+}
+
+RIB_ret_code_t  command_route(RIB* rtab, char* argv) {
+  char* destination = argv;
+  if (destination == NULL) {
+    printf("%s\n", USAGE_DEL);
+  }
+  Route* result = NULL;
+  RIB_ret_code_t rc = RIB_match(rtab, destination, &result);
+  if (rc == RIB_NO_ERROR) {
+    printRoute(result);
+  }
+  return rc;
+}
+
+RIB_ret_code_t  command_dump(RIB* rtab, char* argv) {
+  printf("Destination\tNetmask\t\tGateway\t\tIface\tMetric\n");
+  for (int i = 0; i < rtab->entries; i++) {
+    printRoute(rtab->routes[i]);
+  }
+  return RIB_NO_ERROR;
+}
+
 int main(int argc, char* argv[]) {
 
   //Get command
@@ -219,16 +396,16 @@ int main(int argc, char* argv[]) {
     return 1;
   }
   //Initialize routing table
-  RIB* rtab;
-  RIB_ret_code_t rc = RIB_init(rtab);
+  RIB* rtab = NULL;
+  RIB_ret_code_t rc = RIB_init(&rtab);
   if (rc != RIB_NO_ERROR) {
-    printf("Could not initialize RIB\n");
+    printf("COULD NOT INITIALIZE RIB!\n");
     return rc;
   }
   //Parse routing table
   char* routingTableFile = argv[1];
   if (parseRoutingTable(rtab, routingTableFile) != 0) {
-    printf("Could not parse routing table!\n");
+    printf("COULD NOT PARSE ROUTING TABLE!\n");
     RIB_free(rtab);
     return 1;
   }
@@ -236,10 +413,25 @@ int main(int argc, char* argv[]) {
   int quitCalled = 0;
 
   while (!quitCalled) {
-    char inputLine[255];
-    scanf("> %s", &inputLine);
-    char* commandStr = strtok(inputLine, " ");
-    route_cmd_t command = getCommand(commandStr); 
+    size_t bufSize = 255;
+    char* inputLine = (char*) malloc(sizeof(char) * bufSize);
+    printf("> ");
+    size_t len = getline(&inputLine, &bufSize, stdin);
+    //remove CRLF
+    if (inputLine[len - 1] == 0x0a) {
+      inputLine[len - 1] = 0x00;
+    }
+    if (inputLine[len - 2] == 0x0d) {
+      inputLine[len - 2] = 0x00;
+    }
+    route_cmd_t command;
+    if (strchr(inputLine, ' ') == NULL) {
+      command = getCommand(inputLine);
+    } else {
+      char* commandStr = strtok(inputLine, " ");
+      inputLine = strtok(NULL, "");
+      command = getCommand(commandStr); 
+    }
     switch (command) {
       case UNKNOWN:
       case HELP: {
@@ -248,12 +440,12 @@ int main(int argc, char* argv[]) {
       }
       case QUIT: {
         quitCalled = 1;
-        printf("Closing RIB...\n");
+        printf("CLOSING RIB...\n");
         break;
       }
       case ADD: {
         RIB_ret_code_t ret;
-        if ((ret = addCommand(rtab, inputLine)) != RIB_NO_ERROR) {
+        if ((ret = command_add(rtab, inputLine)) != RIB_NO_ERROR) {
           printf("COMMAND ERROR: %d\n", ret);
         } else {
           printf("OK\n");
@@ -261,57 +453,94 @@ int main(int argc, char* argv[]) {
         break;
       }
       case DELETE: {
+        RIB_ret_code_t ret;
+        if ((ret = command_delete(rtab, inputLine)) != RIB_NO_ERROR) {
+          printf("COMMAND ERROR: %d\n", ret);
+        } else {
+          printf("OK\n");
+        }
         break;
       }
       case UPDATE: {
+        RIB_ret_code_t ret;
+        if ((ret = command_update(rtab, inputLine)) != RIB_NO_ERROR) {
+          printf("COMMAND ERROR: %d\n", ret);
+        } else {
+          printf("OK\n");
+        }
         break;
       }
       case CLEAR: {
+        RIB_ret_code_t ret;
+        if ((ret = command_clear(rtab, inputLine)) != RIB_NO_ERROR) {
+          printf("COMMAND ERROR: %d\n", ret);
+        } else {
+          printf("OK\n");
+        }
         break;
       }
       case SELECT: {
+        RIB_ret_code_t ret;
+        if ((ret = command_select(rtab, inputLine)) != RIB_NO_ERROR) {
+          printf("COMMAND ERROR: %d\n", ret);
+        } else {
+          printf("OK\n");
+        }
         break;
       }
       case ROUTE: {
+        RIB_ret_code_t ret;
+        if ((ret = command_route(rtab, inputLine)) != RIB_NO_ERROR) {
+          printf("COMMAND ERROR: %d\n", ret);
+        } else {
+          printf("OK\n");
+        }
         break;
       }
       case DUMP: {
+        RIB_ret_code_t ret;
+        if ((ret = command_dump(rtab, inputLine)) != RIB_NO_ERROR) {
+          printf("COMMAND ERROR: %d\n", ret);
+        } else {
+          printf("OK\n");
+        }
         break;
       }
       case COMMIT: {
         int ret;
         if ((ret = commitRoutingTable(rtab, routingTableFile)) != 0 ) {
-          printf("Could not commit changes to routing table (%d)\n", ret);
+          printf("COMMAND ERROR: %d\n", ret);
+        } else {
+          printf("OK\n");
         }
         break;
       }
       case ROLLBACK: {
         RIB_free(rtab);
-        rc = RIB_init(rtab);
+        rc = RIB_init(&rtab);
         if (rc != RIB_NO_ERROR) {
-          printf("Could not re-initialize RIB\n");
+          printf("COMMAND ERROR: %d\n", -1);
           return rc;
         }
         if (parseRoutingTable(rtab, routingTableFile) != 0) {
-          printf("Could not parse routing table!\n");
+          printf("COMMAND ERROR: %d\n", -1);
           RIB_free(rtab);
           return 1;
         }
-        printf("Routing table rollbacked!\n");
+        printf("OK\n");
         break;
       }
     }
-
   }
 
   //Commit changes
   int ret;
   if ((ret = commitRoutingTable(rtab, routingTableFile)) != 0) {
-    printf("Could not commit changes to routing table (%d)\n", ret);
+    printf("COMMIT FAILED (%d)\n", ret);
   }
   //Free RIB table
   RIB_free(rtab);
-  printf("RIB closed.\n");
+  printf("RIB CLOSED.\n");
 
   return 0;
 }

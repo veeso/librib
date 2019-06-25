@@ -51,13 +51,13 @@ typedef enum RIB_ret_code_t {
 RIB_ret_code_t RIB_init(RIB** rtab);
 RIB_ret_code_t RIB_free(RIB* rtab);
 RIB_ret_code_t RIB_add(RIB* rtab, const char* destination, const char* netmask, const char* gateway, const char* iface, int metric);
-RIB_ret_code_t RIB_delete(RIB* rtab, const char* destination);
-RIB_ret_code_t RIB_update(RIB* rtab, const char* destination, const char* newNetmask, const char* newGateway, const char* newIface, int newMetric);
+RIB_ret_code_t RIB_delete(RIB* rtab, const char* destination, const char* netmask);
+RIB_ret_code_t RIB_update(RIB* rtab, const char* destination, const char* netmask, const char* newNetmask, const char* newGateway, const char* newIface, int newMetric);
 RIB_ret_code_t RIB_clear(RIB* rtab);
 
 // Table querying functions
 
-RIB_ret_code_t RIB_find(RIB* rtab, const char* networkAddr, Route** route);
+RIB_ret_code_t RIB_find(RIB* rtab, const char* networkAddr, const char* netmask, Route** route);
 RIB_ret_code_t RIB_match(RIB* rtab, const char* destination, Route** route);
 RIB_ret_code_t RIB_match_ipv4(RIB* rtab, const char* destination, Route** route);
 RIB_ret_code_t RIB_match_ipv6(RIB* rtab, const char* destination, Route** route);

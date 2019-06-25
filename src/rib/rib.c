@@ -115,7 +115,7 @@ RIB_ret_code_t RIB_add(RIB* rtab, const char* destination, const char* netmask, 
   //check if an entry for provided destination already exists
   for (size_t i = 0; i < rtab->entries; i++) {
     Route* thisRoute = rtab->routes[i];
-    if (compareIPv4Addresses(thisRoute->destination, destination) == 0) {
+    if (compareIPv4Addresses(thisRoute->destination, destination) == 0 && compareIPv4Addresses(thisRoute->netmask, netmask) == 0) {
       return RIB_INVALID_ADDRESS;
     }
   }
@@ -181,7 +181,7 @@ RIB_ret_code_t RIB_add(RIB* rtab, const char* destination, const char* netmask, 
  * @returns RIB_ret_code_t: 0 if succeeded
  */
 
-RIB_ret_code_t RIB_delete(RIB* rtab, const char* destination) {
+RIB_ret_code_t RIB_delete(RIB* rtab, const char* destination, const char* netmask) {
   if (rtab == NULL) {
     return RIB_UNINITIALIZED_RIB;
   }
@@ -191,7 +191,7 @@ RIB_ret_code_t RIB_delete(RIB* rtab, const char* destination) {
   //Iterate over routing table to find the destination to remove
   for (size_t i = 0; i < rtab->entries; i++) {
     Route* thisRoute = rtab->routes[i];
-    if (compareIPv4Addresses(thisRoute->destination, destination) == 0) {
+    if (compareIPv4Addresses(thisRoute->destination, destination) == 0 && (compareIPv4Addresses(thisRoute->netmask, netmask) == 0 || strcmp(netmask, "*") == 0)) {
       //We found it!
       size_t currIndex = i;
       //Delete element
@@ -241,7 +241,7 @@ RIB_ret_code_t RIB_delete(RIB* rtab, const char* destination) {
  * @returns RIB_ret_code_t
  */
 
-RIB_ret_code_t RIB_update(RIB* rtab, const char* destination, const char* newNetmask, const char* newGateway, const char* newIface, int newMetric) {
+RIB_ret_code_t RIB_update(RIB* rtab, const char* destination, const char* netmask, const char* newNetmask, const char* newGateway, const char* newIface, int newMetric) {
   if (rtab == NULL) {
     return RIB_UNINITIALIZED_RIB;
   }
@@ -259,7 +259,7 @@ RIB_ret_code_t RIB_update(RIB* rtab, const char* destination, const char* newNet
   //Iterate over routing table to find the destination to update
   for (size_t i = 0; i < rtab->entries; i++) {
     Route* thisRoute = rtab->routes[i];
-    if (compareIPv4Addresses(thisRoute->destination, destination) == 0) {
+    if (compareIPv4Addresses(thisRoute->destination, destination) == 0 && compareIPv4Addresses(thisRoute->netmask, netmask) == 0) {
       //We found it
       //Check if ip versions match
       if (thisRoute->ipv != ipVersion) {
@@ -355,7 +355,7 @@ RIB_ret_code_t RIB_clear(RIB* rtab) {
  * @returns RIB_ret_code_t
  */
 
-RIB_ret_code_t RIB_find(RIB* rtab, const char* networkAddr, Route** route) {
+RIB_ret_code_t RIB_find(RIB* rtab, const char* networkAddr, const char* netmask, Route** route) {
   if (rtab == NULL) {
     return RIB_UNINITIALIZED_RIB;
   }
@@ -364,7 +364,7 @@ RIB_ret_code_t RIB_find(RIB* rtab, const char* networkAddr, Route** route) {
   }
   for (size_t i = 0; i < rtab->entries; i++) {
     Route* thisRoute = rtab->routes[i];
-    if (compareIPv4Addresses(thisRoute->destination, networkAddr) == 0) {
+    if (compareIPv4Addresses(thisRoute->destination, networkAddr) == 0 && (compareIPv4Addresses(thisRoute->netmask, netmask) == 0 || strcmp(netmask, "*") == 0)) {
       *route = thisRoute;
       return RIB_NO_ERROR;
     }
@@ -437,7 +437,7 @@ RIB_ret_code_t RIB_match_ipv4(RIB* rtab, const char* destination, Route** route)
   //check also 0.0.0.0 as destination if route is NULL
   if (*route == NULL) {
     const char default_address[8] = "0.0.0.0";
-    RIB_find(rtab, default_address, route);
+    RIB_find(rtab, default_address, default_address, route);
   }
 
   if (*route == NULL) {
