@@ -154,8 +154,13 @@ RIB_ret_code_t RIB_add(RIB* rtab, const char* destination, const char* netmask, 
     free(newRoute);
     return RIB_BAD_ALLOC;
   }
+  //Convert destination to a real destination (it may be not if user provided us an ip address)
+  if (ipVersion == 4) {
+    newRoute->destination = getIpv4NetworkAddress(destination, netmask);
+  } else if (ipVersion == 6) {
+    newRoute->destination = getIpv6NetworkAddress(destination, netmask);
+  }
   //Copy to new route struct the attributes passed as arguments
-  strcpy(newRoute->destination, destination);
   strcpy(newRoute->netmask, netmask);
   strcpy(newRoute->gateway, gateway);
   strcpy(newRoute->iface, iface);
