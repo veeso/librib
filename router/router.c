@@ -76,7 +76,6 @@ typedef enum route_cmd_t {
 
 void usage() {
 
-  printf("%s\n", USAGE);
   printf("\t%s\n", USAGE_QUIT);
   printf("\t%s\n", USAGE_ADD);
   printf("\t%s\n", USAGE_DEL);
@@ -392,7 +391,7 @@ int main(int argc, char* argv[]) {
 
   //Get command
   if (argc < 2) {
-    usage();
+    printf("%s\n", USAGE);
     return 1;
   }
   //Initialize routing table
