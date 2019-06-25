@@ -222,3 +222,39 @@ int compareIPv4Addresses(const char* ipAddress, const char* cmpIpAddress) {
   free(ipAddr2);
   return ret;
 }
+
+/**
+ * @function getIpv6NetworkAddress
+ * @description returns the network address from a provided ip address and a netmask
+ * @param char*
+ * @param char*
+ * @returns char*
+ */
+
+char* getIpv6NetworkAddress(const char* ipAddress, const char* netmask) {
+  //TODO: implement
+  return NULL;
+}
+
+/**
+ * @function formatIPv6Address
+ * @description format an address to a correct ipv6 format (e.g. TODO: example)
+ * @param char**
+ */
+
+void formatIPv6Address(char** ipAddress) {
+  //TODO: implement
+}
+
+/**
+ * @function compareIPv6Addresses
+ * @description compare two ipv6 addresses and returns if they're equal or not
+ * @param char*
+ * @param char*
+ * @returns int: 0 if they're equal
+ */
+
+int compareIPv6Addresses(const char* ipAddress, const char* cmpIpAddress) {
+  //TODO: implement
+  return 1;
+}
