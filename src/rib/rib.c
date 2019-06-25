@@ -34,11 +34,11 @@
  * @returns RIB_ret_code_t
  */
 
-RIB_ret_code_t RIB_init(RIB* rtab) {
-  rtab = (RIB*) malloc(sizeof(RIB));
+RIB_ret_code_t RIB_init(RIB** rtab) {
+  *rtab = (RIB*) malloc(sizeof(RIB));
   if (rtab != NULL) {
-    rtab->entries = 0;
-    rtab->routes = NULL;
+    (*rtab)->entries = 0;
+    (*rtab)->routes = NULL;
     return RIB_NO_ERROR;
   } else {
     return RIB_BAD_ALLOC;
@@ -218,7 +218,7 @@ RIB_ret_code_t RIB_delete(RIB* rtab, const char* destination) {
       }
       //Reallocate routes
       rtab->routes = (Route**) realloc(rtab->routes, sizeof(Route*) * rtab->entries);
-      if (rtab->routes == NULL) {
+      if (rtab->routes == NULL && rtab->entries > 0) {
         return RIB_BAD_ALLOC;
       }
       return RIB_NO_ERROR;
@@ -253,10 +253,7 @@ RIB_ret_code_t RIB_update(RIB* rtab, const char* destination, const char* newNet
   if (isValidIpAddress(newNetmask, NULL) != 0) {
     return RIB_INVALID_ADDRESS;
   }
-  if (isValidIpAddress(newGateway, NULL) != 0) {
-    return RIB_INVALID_ADDRESS;
-  }
-  if (ipVersion != 4 && ipVersion != 6) {
+  if (isValidIpAddress(newGateway, &ipVersion) != 0) {
     return RIB_INVALID_ADDRESS;
   }
   //Iterate over routing table to find the destination to update
@@ -264,6 +261,10 @@ RIB_ret_code_t RIB_update(RIB* rtab, const char* destination, const char* newNet
     Route* thisRoute = rtab->routes[i];
     if (compareIPv4Addresses(thisRoute->destination, destination) == 0) {
       //We found it
+      //Check if ip versions match
+      if (thisRoute->ipv != ipVersion) {
+        return RIB_INVALID_ADDRESS;
+      }
       //Allocate space for the new record
       thisRoute->netmask = (char*) realloc(thisRoute->netmask, sizeof(char) * (strlen(newNetmask) + 1));
       if (thisRoute->netmask == NULL) {
@@ -340,6 +341,8 @@ RIB_ret_code_t RIB_clear(RIB* rtab) {
     }
   }
   free(rtab->routes);
+  rtab->routes = NULL;
+  rtab->entries = 0;
   return RIB_NO_ERROR;
 }
 
@@ -352,7 +355,7 @@ RIB_ret_code_t RIB_clear(RIB* rtab) {
  * @returns RIB_ret_code_t
  */
 
-RIB_ret_code_t RIB_find(RIB* rtab, const char* networkAddr, Route* route) {
+RIB_ret_code_t RIB_find(RIB* rtab, const char* networkAddr, Route** route) {
   if (rtab == NULL) {
     return RIB_UNINITIALIZED_RIB;
   }
@@ -362,7 +365,7 @@ RIB_ret_code_t RIB_find(RIB* rtab, const char* networkAddr, Route* route) {
   for (size_t i = 0; i < rtab->entries; i++) {
     Route* thisRoute = rtab->routes[i];
     if (compareIPv4Addresses(thisRoute->destination, networkAddr) == 0) {
-      route = thisRoute;
+      *route = thisRoute;
       return RIB_NO_ERROR;
     }
   }
@@ -378,7 +381,7 @@ RIB_ret_code_t RIB_find(RIB* rtab, const char* networkAddr, Route* route) {
  * @returns RIB_ret_code_t
  */
 
-RIB_ret_code_t RIB_match(RIB* rtab, const char* destination, Route* route) {
+RIB_ret_code_t RIB_match(RIB* rtab, const char* destination, Route** route) {
   int ipVersion;
   //Check whether destination is valid
   if (isValidIpAddress(destination, &ipVersion) != 0) {
@@ -403,7 +406,7 @@ RIB_ret_code_t RIB_match(RIB* rtab, const char* destination, Route* route) {
  * @returns RIB_ret_code_t
  */
 
-RIB_ret_code_t RIB_match_ipv4(RIB* rtab, const char* destination, Route* route) {
+RIB_ret_code_t RIB_match_ipv4(RIB* rtab, const char* destination, Route** route) {
   //Iterate over routing table in order to find a suitable route
   if (rtab == NULL) {
     return RIB_UNINITIALIZED_RIB;
@@ -411,7 +414,7 @@ RIB_ret_code_t RIB_match_ipv4(RIB* rtab, const char* destination, Route* route) 
   if (rtab->routes == NULL) {
     return RIB_NO_MATCH;
   }
-  route = NULL;
+  *route = NULL;
   //Iterate over routing table
   for (size_t i = 0; i < rtab->entries; i++) {
     Route* thisRoute = rtab->routes[i];
@@ -420,26 +423,39 @@ RIB_ret_code_t RIB_match_ipv4(RIB* rtab, const char* destination, Route* route) 
     //Check if they match
     if (compareIPv4Addresses(thisNetaddr, thisRoute->destination) == 0) {
       //They match! 
-      if (route == NULL) {
+      if (*route == NULL) {
         //Set immediately this route as next hop
-        route = thisRoute;
+        *route = thisRoute;
       } else {
         //Else check check Longest prefix match
-        if (getCIDRnetmask(route->netmask) < getCIDRnetmask(thisRoute->netmask)) {
-          route = thisRoute;
+        if (getCIDRnetmask((*route)->netmask) < getCIDRnetmask(thisRoute->netmask)) {
+          *route = thisRoute;
         }
       }
     }
   }
   //check also 0.0.0.0 as destination if route is NULL
-  if (route == NULL) {
+  if (*route == NULL) {
     const char default_address[8] = "0.0.0.0";
-    RIB_find(rtab, &default_address, route);
+    RIB_find(rtab, default_address, route);
   }
 
-  if (route == NULL) {
+  if (*route == NULL) {
     return RIB_NO_MATCH;
   }
 
   return RIB_NO_ERROR;
+}
+
+/**
+ * @function RIB_match_ipv6
+ * @description find a matching route for the provided ipv6 destination address; Longest prefix match is used in case of ambiguity
+ * @param RIB*
+ * @param const char* destination
+ * @param Route* matched route; NULL if not found
+ * @returns RIB_ret_code_t
+ */
+
+RIB_ret_code_t RIB_match_ipv6(RIB* rtab, const char* destination, Route** route) {
+  return RIB_NO_MATCH;
 }

@@ -23,6 +23,8 @@
 
 #include <netdb.h>
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 /**
  * @function isValidIpAddress
@@ -136,12 +138,10 @@ char* getIpv4NetworkAddress(const char* ipAddress, const char* netmask) {
   //Create tmp copy for tokenization
   size_t ipLen = strlen(ipAddress);
   char* tmpAddr = (char*) malloc(sizeof(char) * (ipLen + 1));
-  memcpy(tmpAddr, ipAddress, ipLen);
-  tmpAddr[ipLen] = 0x00;
+  strcpy(tmpAddr, ipAddress);
   size_t netmaskLen = strlen(netmask);
   char* tmpNetmask = (char*) malloc(sizeof(char) * (netmaskLen + 1));
-  memcpy(tmpNetmask, netmask, netmaskLen);
-  tmpNetmask[netmaskLen] = 0x00;
+  strcpy(tmpNetmask, netmask);
   //Get ip address tokens
   int ipBytes[4];
   char* ipToken = strtok(tmpAddr, ".");
@@ -154,7 +154,7 @@ char* getIpv4NetworkAddress(const char* ipAddress, const char* netmask) {
   int netmaskBytes[4];
   char* netmaskToken = strtok(tmpNetmask, ".");
   i = 0;
-  while (ipToken) {
+  while (netmaskToken) {
     netmaskBytes[i++] = atoi(netmaskToken);
     netmaskToken = strtok(NULL, ".");
   }
