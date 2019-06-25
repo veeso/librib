@@ -25,6 +25,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <arpa/inet.h>
 
 /**
  * @function isValidIpAddress
@@ -238,12 +239,17 @@ char* getIpv6NetworkAddress(const char* ipAddress, const char* netmask) {
 
 /**
  * @function formatIPv6Address
- * @description format an address to a correct ipv6 format (e.g. TODO: example)
+ * @description format an address to a correct ipv6 format (e.g. 2001:0db8::1428:57ab => 2001:0db8:0000:0000:0000:0000:1428:57ab)
  * @param char**
  */
 
 void formatIPv6Address(char** ipAddress) {
-  //TODO: implement
+  size_t newAddrSize = 39; //7 + (128 / 8)
+  struct in6_addr ipv6Addr;
+  if (inet_pton(AF_INET6, *ipAddress, &ipv6Addr) == 1) {
+    *ipAddress = (char*) realloc(*ipAddress, sizeof(char) * (newAddrSize + 1));
+    sprintf(*ipAddress, "%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x", ipv6Addr.s6_addr[0], ipv6Addr.s6_addr[1], ipv6Addr.s6_addr[2], ipv6Addr.s6_addr[3], ipv6Addr.s6_addr[4], ipv6Addr.s6_addr[5], ipv6Addr.s6_addr[6], ipv6Addr.s6_addr[7], ipv6Addr.s6_addr[8], ipv6Addr.s6_addr[9], ipv6Addr.s6_addr[10], ipv6Addr.s6_addr[11], ipv6Addr.s6_addr[12], ipv6Addr.s6_addr[13], ipv6Addr.s6_addr[14], ipv6Addr.s6_addr[15]);
+  }
 }
 
 /**
