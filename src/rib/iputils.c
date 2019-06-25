@@ -261,6 +261,18 @@ void formatIPv6Address(char** ipAddress) {
  */
 
 int compareIPv6Addresses(const char* ipAddress, const char* cmpIpAddress) {
-  //TODO: implement
-  return 1;
+  //Allocate temporary ip address to compare them
+  char* ipAddr1 = (char*) malloc(sizeof(char) * (strlen(ipAddress) + 1));
+  strcpy(ipAddr1, ipAddress);
+  char* ipAddr2 = (char*) malloc(sizeof(char) * (strlen(cmpIpAddress) + 1));
+  strcpy(ipAddr2, cmpIpAddress);
+  //Format them
+  formatIPv6Address(&ipAddr1);
+  formatIPv6Address(&ipAddr2);
+  //Check if they're equal
+  int ret = strcmp(ipAddr1, ipAddr2);
+  //Free previously allocated temporary addresses
+  free(ipAddr1);
+  free(ipAddr2);
+  return ret;
 }
