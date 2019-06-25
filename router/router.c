@@ -125,30 +125,6 @@ route_cmd_t getCommand(char* commandStr) {
   }
 }
 
-/**
- * @function parseRoutingTable
- * @description parse routing table file and store its entries to the passed RIB
- * @param RIB*
- * @param char*
- * @returns int
- */
-
-int parseRoutingTable(RIB* rtab, char* filename) {
-  return 0;
-}
-
-/**
- * @function commitRoutingTable
- * @description commit routing table changes to file
- * @param RIB*
- * @param char*
- * @returns int
- */
-
-int commitRoutingTable(RIB* rtab, char* filename) {
-  return 0;
-}
-
 void printRoute(const Route* r) {
   printf("%s\t%s\t%s\t%s\t%d\n", r->destination, r->netmask, r->gateway, r->iface, r->metric);
 }
@@ -385,6 +361,74 @@ RIB_ret_code_t  command_dump(RIB* rtab, char* argv) {
     printRoute(rtab->routes[i]);
   }
   return RIB_NO_ERROR;
+}
+
+/**
+ * @function parseRoutingTable
+ * @description parse routing table file and store its entries to the passed RIB
+ * @param RIB*
+ * @param char*
+ * @returns int
+ */
+
+int parseRoutingTable(RIB* rtab, char* filename) {
+  //Read routing table file
+  FILE* filePtr;
+  filePtr = fopen(filename, "r");
+  if (!filePtr) {
+    printf("Could not open file %s\n", filename);
+    return 0;
+  }
+  
+  char line[256];
+  //Read file line by line
+  while (fgets(line, sizeof(line), filePtr)) {
+    size_t len = strlen(line);
+    //remove CRLF
+    if (line[len - 1] == 0x0a) {
+      line[len - 1] = 0x00;
+    }
+    if (line[len - 2] == 0x0d) {
+      line[len - 2] = 0x00;
+    }
+    //Add to routing table
+    RIB_ret_code_t rc;
+    printf("ADD %s\n", line);
+    if ((rc = command_add(rtab, line) != RIB_NO_ERROR)) {
+      printf("ERROR: %s (%d)", line, rc);
+    }
+  }
+  fclose(filePtr);
+
+  return 0;
+}
+
+/**
+ * @function commitRoutingTable
+ * @description commit routing table changes to file
+ * @param RIB*
+ * @param char*
+ * @returns int
+ */
+
+int commitRoutingTable(RIB* rtab, char* filename) {
+  if (rtab == NULL) {
+    return 1;
+  }
+  FILE* filePtr;
+  filePtr = fopen(filename, "w");
+  if (!filePtr) {
+    printf("Could not open file %s\n", filename);
+    return 1;
+  }
+  for (int i = 0; i < rtab->entries; i++) {
+    Route* currRoute = rtab->routes[i];
+    char line[256];
+    sprintf(line, "%s %s %s %s %d\n", currRoute->destination, currRoute->netmask, currRoute->gateway, currRoute->iface, currRoute->metric);
+    fwrite(&line, sizeof(char), strlen(line), filePtr);
+  }
+  fclose(filePtr);
+  return 0;
 }
 
 int main(int argc, char* argv[]) {
