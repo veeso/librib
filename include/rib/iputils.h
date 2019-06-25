@@ -32,8 +32,5 @@ int compareIPv4Addresses(const char* ipAddress, const char* cmpIpAddress);
 char* getIpv6NetworkAddress(const char* ipAddress, const char* netmask);
 void formatIPv6Address(char** ipAddress);
 int compareIPv6Addresses(const char* ipAddress, const char* cmpIpAddress);
-//char* getMinHostAddr(char* networkAddr, char* netmask);
-//char* getMaxHostAddr(char* networkAddr, char* netmask);
-//char* getBroadcastAddr(char* networkAddr, char* netmask);
 
 #endif
