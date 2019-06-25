@@ -55,7 +55,7 @@ RIB_ret_code_t RIB_delete(RIB* rtab, const char* destination, const char* netmas
 RIB_ret_code_t RIB_update(RIB* rtab, const char* destination, const char* netmask, const char* newNetmask, const char* newGateway, const char* newIface, int newMetric);
 RIB_ret_code_t RIB_clear(RIB* rtab);
 
-// Table querying functions
+// Table query functions
 
 RIB_ret_code_t RIB_find(RIB* rtab, const char* networkAddr, const char* netmask, Route** route);
 RIB_ret_code_t RIB_match(RIB* rtab, const char* destination, Route** route);
