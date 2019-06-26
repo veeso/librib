@@ -29,7 +29,7 @@ int getCIDRnetmask(const char* netmask);
 char* getIpv4NetworkAddress(const char* ipAddress, const char* netmask);
 void formatIPv4Address(char** ipAddress);
 int compareIPv4Addresses(const char* ipAddress, const char* cmpIpAddress);
-char* getIpv6NetworkAddress(const char* ipAddress, const char* netmask);
+char* getIpv6NetworkAddress(const char* ipAddress, int prefixLength);
 void formatIPv6Address(char** ipAddress);
 int compareIPv6Addresses(const char* ipAddress, const char* cmpIpAddress);
 

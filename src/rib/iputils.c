@@ -228,12 +228,41 @@ int compareIPv4Addresses(const char* ipAddress, const char* cmpIpAddress) {
  * @function getIpv6NetworkAddress
  * @description returns the network address from a provided ip address and a netmask
  * @param char*
- * @param char*
+ * @param int
  * @returns char*
  */
 
-char* getIpv6NetworkAddress(const char* ipAddress, const char* netmask) {
-  //TODO: implement
+char* getIpv6NetworkAddress(const char* ipAddress, int prefixLength) {
+  size_t newAddrSize = 39; //7 + (128 / 8)
+  struct in6_addr ipv6Addr;
+  char* networkAddress;
+  if (inet_pton(AF_INET6, ipAddress, &ipv6Addr) == 1) {
+    networkAddress = (char*) malloc(sizeof(char) * (newAddrSize + 1));
+    int bytes = prefixLength / 8;
+    int putColumn = 0;
+    int addrIndex = 0;
+    int networkAddressPartSize = (bytes * 2) + (bytes / 2);
+    int i = 0;
+    while (i < networkAddressPartSize) {
+      char addrPart[3];
+      sprintf(addrPart, "%02x", ipv6Addr.s6_addr[addrIndex++]);
+      memcpy(networkAddress + i, addrPart, 2);
+      i += 2;
+      if (putColumn == 1 && i < newAddrSize ) {
+        networkAddress[i++] = ':';
+      }
+      putColumn = 1 - putColumn;
+    }
+    while (i < newAddrSize) {
+      memcpy(networkAddress + i, "00", 2);
+      i += 2;
+      if (putColumn && i + 1 < newAddrSize ) {
+        networkAddress[i++] = ':';
+      }
+      putColumn = 1 - putColumn;
+    }
+    return networkAddress;
+  }
   return NULL;
 }
 

@@ -87,7 +87,7 @@ RIB_ret_code_t RIB_free(RIB* rtab) {
  * @description add new entry to the routing table
  * @param RIB* routing table
  * @param const char* destination
- * @param const char* netmask
+ * @param const char* netmask/prefix char representation
  * @param const char* gateway
  * @param const char* iface
  * @param int metric
@@ -103,8 +103,10 @@ RIB_ret_code_t RIB_add(RIB* rtab, const char* destination, const char* netmask, 
   if (isValidIpAddress(destination, &ipVersion) != 0) {
     return RIB_INVALID_ADDRESS;
   }
-  if (isValidIpAddress(netmask, NULL) != 0) {
-    return RIB_INVALID_ADDRESS;
+  if (ipVersion == 4) {
+    if (isValidIpAddress(netmask, NULL) != 0) {
+      return RIB_INVALID_ADDRESS;
+    }
   }
   if (isValidIpAddress(gateway, NULL) != 0) {
     return RIB_INVALID_ADDRESS;
@@ -120,7 +122,9 @@ RIB_ret_code_t RIB_add(RIB* rtab, const char* destination, const char* netmask, 
         return RIB_INVALID_ADDRESS;
       }
     } else if (ipVersion == 6 && thisRoute->ipv == 6) {
-      if (compareIPv6Addresses(thisRoute->destination, destination) == 0 && compareIPv6Addresses(thisRoute->netmask, netmask) == 0) {
+      int thisPrefix = atoi(netmask);
+      thisPrefix = (thisPrefix - (thisPrefix % 8));
+      if (compareIPv6Addresses(thisRoute->destination, destination) == 0 && thisRoute->prefixLength == thisPrefix) {
         return RIB_INVALID_ADDRESS;
       }
     }
@@ -128,27 +132,19 @@ RIB_ret_code_t RIB_add(RIB* rtab, const char* destination, const char* netmask, 
   //Allocate new route struct
   Route* newRoute = (Route*) malloc(sizeof(Route));
   //Allocate space for the new record
-  newRoute->destination = (char*) malloc(sizeof(char) * (strlen(destination) + 1));
-  if (newRoute->destination == NULL) {
-    free(newRoute);
-    return RIB_BAD_ALLOC;
-  }
   newRoute->netmask = (char*) malloc(sizeof(char) * (strlen(netmask) + 1));
   if (newRoute->netmask == NULL) {
-    free(newRoute->destination);
     free(newRoute);
     return RIB_BAD_ALLOC;
   }
   newRoute->gateway = (char*) malloc(sizeof(char) * (strlen(gateway) + 1));
   if (newRoute->netmask == NULL) {
-    free(newRoute->destination);
     free(newRoute->netmask);
     free(newRoute);
     return RIB_BAD_ALLOC;
   }
   newRoute->iface = (char*) malloc(sizeof(char) * (strlen(iface) + 1));
   if (newRoute->iface == NULL) {
-    free(newRoute->destination);
     free(newRoute->netmask);
     free(newRoute->gateway);
     free(newRoute);
@@ -157,8 +153,20 @@ RIB_ret_code_t RIB_add(RIB* rtab, const char* destination, const char* netmask, 
   //Convert destination to a real destination (it may be not if user provided us an ip address)
   if (ipVersion == 4) {
     newRoute->destination = getIpv4NetworkAddress(destination, netmask);
+    if (newRoute->destination == NULL) {
+      free(newRoute->netmask);
+      free(newRoute->gateway);
+      free(newRoute);
+    }
   } else if (ipVersion == 6) {
-    newRoute->destination = getIpv6NetworkAddress(destination, netmask);
+    newRoute->prefixLength = atoi(netmask);
+    newRoute->prefixLength = (newRoute->prefixLength - (newRoute->prefixLength % 8)); //Must be multiply of 8
+    newRoute->destination = getIpv6NetworkAddress(destination, newRoute->prefixLength);
+    if (newRoute->destination == NULL) {
+      free(newRoute->netmask);
+      free(newRoute->gateway);
+      free(newRoute);
+    }
   }
   //Copy to new route struct the attributes passed as arguments
   strcpy(newRoute->netmask, netmask);
@@ -173,7 +181,6 @@ RIB_ret_code_t RIB_add(RIB* rtab, const char* destination, const char* netmask, 
     formatIPv4Address(&newRoute->gateway);
   } else if (newRoute->ipv == 6) {
     formatIPv6Address(&newRoute->destination);
-    formatIPv6Address(&newRoute->netmask);
     formatIPv6Address(&newRoute->gateway);
   }
   //Increment entries
@@ -244,7 +251,9 @@ RIB_ret_code_t RIB_delete(RIB* rtab, const char* destination, const char* netmas
         return RIB_NO_ERROR;
       }
     } else if (thisRoute->ipv == 6 && ipVersion == 6) {
-      if (compareIPv6Addresses(thisRoute->destination, destination) == 0 && (compareIPv6Addresses(thisRoute->netmask, netmask) == 0 || strcmp(netmask, "*") == 0)) {
+      int thisPrefix = atoi(netmask);
+      thisPrefix = (thisPrefix - (thisPrefix % 8));
+      if (compareIPv6Addresses(thisRoute->destination, destination) == 0 && thisRoute->prefixLength == thisPrefix) {
         //We found it!
         size_t currIndex = i;
         //Delete element
@@ -353,7 +362,9 @@ RIB_ret_code_t RIB_update(RIB* rtab, const char* destination, const char* netmas
         return RIB_NO_ERROR;
       }
     } else if (thisRoute->ipv == 6 && ipVersion == 6) {
-      if (compareIPv6Addresses(thisRoute->destination, destination) == 0 && compareIPv6Addresses(thisRoute->netmask, netmask) == 0) {
+      int thisPrefix = atoi(netmask);
+      thisPrefix = (thisPrefix - (thisPrefix % 8));
+      if (compareIPv6Addresses(thisRoute->destination, destination) == 0 && thisRoute->prefixLength == thisPrefix) {
         //We found it
         //Allocate space for the new record
         thisRoute->netmask = (char*) realloc(thisRoute->netmask, sizeof(char) * (strlen(newNetmask) + 1));
@@ -387,7 +398,9 @@ RIB_ret_code_t RIB_update(RIB* rtab, const char* destination, const char* netmas
         strcpy(thisRoute->gateway, newGateway);
         strcpy(thisRoute->iface, newIface);
         //Format addresses
-        formatIPv6Address(&thisRoute->netmask);
+        if (thisRoute->ipv == 6) {
+          thisRoute->prefixLength = atoi(thisRoute->netmask);
+        }
         formatIPv6Address(&thisRoute->gateway);
         return RIB_NO_ERROR;
       }
@@ -463,7 +476,9 @@ RIB_ret_code_t RIB_find(RIB* rtab, const char* networkAddr, const char* netmask,
         return RIB_NO_ERROR;
       }
     } else if (thisRoute->ipv == 6 && ipVersion == 6) {
-      if (compareIPv6Addresses(thisRoute->destination, networkAddr) == 0 && (compareIPv6Addresses(thisRoute->netmask, netmask) == 0 || strcmp(netmask, "*") == 0)) {
+      int thisPrefix = atoi(netmask);
+      thisPrefix = (thisPrefix - (thisPrefix % 8));
+      if (compareIPv6Addresses(thisRoute->destination, networkAddr) == 0 && thisRoute->prefixLength == thisPrefix) {
         *route = thisRoute;
         return RIB_NO_ERROR;
       }
@@ -533,6 +548,7 @@ RIB_ret_code_t RIB_match_ipv4(RIB* rtab, const char* destination, Route** route)
         }
       }
     }
+    free(thisNetaddr);
   }
   //check also 0.0.0.0 as destination if route is NULL
   if (*route == NULL) {
@@ -557,6 +573,43 @@ RIB_ret_code_t RIB_match_ipv4(RIB* rtab, const char* destination, Route** route)
  */
 
 RIB_ret_code_t RIB_match_ipv6(RIB* rtab, const char* destination, Route** route) {
-  //TODO: implement
+  //Iterate over routing table in order to find a suitable route
+  if (rtab == NULL) {
+    return RIB_UNINITIALIZED_RIB;
+  }
+  if (rtab->routes == NULL) {
+    return RIB_NO_MATCH;
+  }
+  *route = NULL;
+  //Iterate over routing table
+  for (size_t i = 0; i < rtab->entries; i++) {
+    Route* thisRoute = rtab->routes[i];
+    //Find the network address with the provided address and check if they match
+    char* thisNetaddr = getIpv6NetworkAddress(destination, thisRoute->prefixLength);
+    //Check if they match
+    if (compareIPv6Addresses(thisNetaddr, thisRoute->destination) == 0) {
+      //They match! 
+      if (*route == NULL) {
+        //Set immediately this route as next hop
+        *route = thisRoute;
+      } else {
+        //Else check check Longest prefix match
+        if ((*route)->prefixLength < thisRoute->prefixLength) {
+          *route = thisRoute;
+        }
+      }
+    }
+  }
+  //check also 0.0.0.0 as destination if route is NULL
+  if (*route == NULL) {
+    const char default_address[39] = "0000:0000:0000:0000:0000:0000:0000:0000";
+    RIB_find(rtab, default_address, default_address, route);
+  }
+
+  if (*route == NULL) {
+    return RIB_NO_MATCH;
+  }
+
+  return RIB_NO_ERROR;
   return RIB_NO_MATCH;
 }

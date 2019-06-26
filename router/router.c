@@ -126,7 +126,11 @@ route_cmd_t getCommand(char* commandStr) {
 }
 
 void printRoute(const Route* r) {
-  printf("%s\t%s\t%s\t%s\t%d\n", r->destination, r->netmask, r->gateway, r->iface, r->metric);
+  if (r->ipv == 4) {
+    printf("%s\t%s\t%s\t%s\t%d\n", r->destination, r->netmask, r->gateway, r->iface, r->metric);
+  } else if (r->ipv == 6) {
+    printf("%s\t%d\t%s\t%s\t%d\n", r->destination, r->prefixLength, r->gateway, r->iface, r->metric);
+  }
 }
 
 RIB_ret_code_t command_add(RIB* rtab, char* argv) {
@@ -187,11 +191,16 @@ RIB_ret_code_t command_add(RIB* rtab, char* argv) {
   if (iface == NULL) {
     free(destination);
     free(netmask);
-    free(iface);
+    free(gateway);
     return RIB_INVALID_ADDRESS;
   }
   //Add route
-  return RIB_add(rtab, destination, netmask, gateway, iface, metric);
+  RIB_ret_code_t rc = RIB_add(rtab, destination, netmask, gateway, iface, metric);
+  free(destination);
+  free(netmask);
+  free(gateway);
+  free(iface);
+  return rc;
 }
 
 RIB_ret_code_t command_delete(RIB* rtab, char* argv) {
@@ -225,7 +234,10 @@ RIB_ret_code_t command_delete(RIB* rtab, char* argv) {
     free(destination);
     return RIB_INVALID_ADDRESS;
   }
-  return RIB_delete(rtab, destination, netmask);
+  RIB_ret_code_t rc = RIB_delete(rtab, destination, netmask);
+  free(destination);
+  free(netmask);
+  return rc;
 }
 
 RIB_ret_code_t command_update(RIB* rtab, char* argv) {
@@ -284,19 +296,32 @@ RIB_ret_code_t command_update(RIB* rtab, char* argv) {
     free(destination);
     return RIB_INVALID_ADDRESS;
   }
+  if (newNetmask == NULL) {
+    free(destination);
+    free(netmask);
+    return RIB_INVALID_ADDRESS;
+  }
   if (gateway == NULL) {
     free(destination);
     free(netmask);
+    free(newNetmask);
     return RIB_INVALID_ADDRESS;
   }
   if (iface == NULL) {
     free(destination);
     free(netmask);
+    free(newNetmask);
     free(iface);
     return RIB_INVALID_ADDRESS;
   }
   //Add route
-  return RIB_update(rtab, destination, netmask, newNetmask, gateway, iface, metric);
+  RIB_ret_code_t rc = RIB_update(rtab, destination, netmask, newNetmask, gateway, iface, metric);
+  free(destination);
+  free(netmask);
+  free(newNetmask);
+  free(gateway);
+  free(iface);
+  return rc;
 }
 
 RIB_ret_code_t command_clear(RIB* rtab, char* argv) {
@@ -339,6 +364,8 @@ RIB_ret_code_t command_select(RIB* rtab, char* argv) {
   if (rc == RIB_NO_ERROR) {
     printRoute(result);
   }
+  free(destination);
+  free(netmask);
   return rc;
 }
 
@@ -458,6 +485,7 @@ int main(int argc, char* argv[]) {
   while (!quitCalled) {
     size_t bufSize = 255;
     char* inputLine = (char*) malloc(sizeof(char) * bufSize);
+    char* origInputLine = inputLine;
     printf("> ");
     size_t len = getline(&inputLine, &bufSize, stdin);
     //remove CRLF
@@ -574,6 +602,7 @@ int main(int argc, char* argv[]) {
         break;
       }
     }
+    free(origInputLine);
   }
 
   //Commit changes
