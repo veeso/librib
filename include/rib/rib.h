@@ -24,6 +24,10 @@
 #ifndef RIB_H
 #define RIB_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <rib/route.h>
 
 #include <stdlib.h>
@@ -63,5 +67,9 @@ RIB_ret_code_t RIB_find(RIB* rtab, const char* networkAddr, const char* netmask,
 RIB_ret_code_t RIB_match(RIB* rtab, const char* destination, Route** route);
 RIB_ret_code_t RIB_match_ipv4(RIB* rtab, const char* destination, Route** route);
 RIB_ret_code_t RIB_match_ipv6(RIB* rtab, const char* destination, Route** route);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

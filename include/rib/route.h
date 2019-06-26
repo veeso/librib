@@ -24,6 +24,10 @@
 #ifndef ROUTE_H
 #define ROUTE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Data types
 
 typedef struct Route {
@@ -37,5 +41,9 @@ typedef struct Route {
 } Route;
 
 // Functions
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

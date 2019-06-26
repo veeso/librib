@@ -24,6 +24,10 @@
 #ifndef IPUTILS_H
 #define IPTUILS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int isValidIpAddress(const char* ipAddr, int* ipv);
 int getCIDRnetmask(const char* netmask);
 char* getIpv4NetworkAddress(const char* ipAddress, const char* netmask);
@@ -32,5 +36,9 @@ int compareIPv4Addresses(const char* ipAddress, const char* cmpIpAddress);
 char* getIpv6NetworkAddress(const char* ipAddress, int prefixLength);
 void formatIPv6Address(char** ipAddress);
 int compareIPv6Addresses(const char* ipAddress, const char* cmpIpAddress);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
