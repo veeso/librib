@@ -29,7 +29,7 @@
 typedef struct Route {
   char* destination;
   char* netmask;    //IPv4 specific
-  int prefixLength; //IPv6 specific 
+  int prefixLength; //IPv6 specific
   char* gateway;
   char* iface;
   int metric;

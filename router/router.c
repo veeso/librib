@@ -134,7 +134,6 @@ void printRoute(const Route* r) {
 }
 
 RIB_ret_code_t command_add(RIB* rtab, char* argv) {
-  const int args = 5;
   char* arg = strtok(argv, " ");
   //Define data
   char* destination = NULL;

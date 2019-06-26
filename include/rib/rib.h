@@ -28,6 +28,8 @@
 
 #include <stdlib.h>
 
+#define RIB_LIB_VERSION "0.1.0"
+
 // Data types
 
 typedef struct RIB {
