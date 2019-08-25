@@ -32,7 +32,7 @@ extern "C" {
 
 #include <stdlib.h>
 
-#define RIB_LIB_VERSION "0.1.0"
+#define RIB_LIB_VERSION "1.0.0"
 
 // Data types
 

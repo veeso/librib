@@ -1,10 +1,10 @@
 # LibRIB
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![HitCount](http://hits.dwyl.io/ChristianVisintin/librib.svg)](http://hits.dwyl.io/ChristianVisintin/librib) [![Stars](https://img.shields.io/github/stars/ChristianVisintin/librib.svg)](https://github.com/ChristianVisintin/librib) [![Issues](https://img.shields.io/github/issues/ChristianVisintin/librib.svg)](https://github.com/ChristianVisintin/librib) [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/ChristianVisintin/librib/issues)
+[![License: MIT](https://img.shields.io/badge/License-MIT-red.svg)](https://opensource.org/licenses/MIT) [![HitCount](http://hits.dwyl.io/ChristianVisintin/librib.svg)](http://hits.dwyl.io/ChristianVisintin/librib) [![Stars](https://img.shields.io/github/stars/ChristianVisintin/librib.svg)](https://github.com/ChristianVisintin/librib) [![Issues](https://img.shields.io/github/issues/ChristianVisintin/librib.svg)](https://github.com/ChristianVisintin/librib) [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/ChristianVisintin/librib/issues)
 
 Developed by *Christian Visintin*
 
-Current Version 0.1.0
+Current Version 1.0.0
 
 ---
 
@@ -222,7 +222,7 @@ The route to use  is returned as a Route* pointer.
 
 ## Known Issues
 
-* The IPv6 netmask is not very comfortable to be set and the syntax will be probably changed
+/
 
 ## License
 
