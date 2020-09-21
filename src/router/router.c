@@ -516,7 +516,7 @@ int main(int argc, char* argv[]) {
       case ADD: {
         RIB_ret_code_t ret;
         if ((ret = command_add(rtab, inputLine)) != RIB_NO_ERROR) {
-          printf("COMMAND ERROR: %d\n", ret);
+          printf("ERROR: %s\n", RIB_get_error_msg(ret));
         } else {
           printf("OK\n");
         }
@@ -525,7 +525,7 @@ int main(int argc, char* argv[]) {
       case DELETE: {
         RIB_ret_code_t ret;
         if ((ret = command_delete(rtab, inputLine)) != RIB_NO_ERROR) {
-          printf("COMMAND ERROR: %d\n", ret);
+          printf("ERROR: %s\n", RIB_get_error_msg(ret));
         } else {
           printf("OK\n");
         }
@@ -534,7 +534,7 @@ int main(int argc, char* argv[]) {
       case UPDATE: {
         RIB_ret_code_t ret;
         if ((ret = command_update(rtab, inputLine)) != RIB_NO_ERROR) {
-          printf("COMMAND ERROR: %d\n", ret);
+          printf("ERROR: %s\n", RIB_get_error_msg(ret));
         } else {
           printf("OK\n");
         }
@@ -543,7 +543,7 @@ int main(int argc, char* argv[]) {
       case CLEAR: {
         RIB_ret_code_t ret;
         if ((ret = command_clear(rtab, inputLine)) != RIB_NO_ERROR) {
-          printf("COMMAND ERROR: %d\n", ret);
+          printf("ERROR: %s\n", RIB_get_error_msg(ret));
         } else {
           printf("OK\n");
         }
@@ -552,7 +552,7 @@ int main(int argc, char* argv[]) {
       case SELECT: {
         RIB_ret_code_t ret;
         if ((ret = command_select(rtab, inputLine)) != RIB_NO_ERROR) {
-          printf("COMMAND ERROR: %d\n", ret);
+          printf("ERROR: %s\n", RIB_get_error_msg(ret));
         } else {
           printf("OK\n");
         }
@@ -561,7 +561,7 @@ int main(int argc, char* argv[]) {
       case ROUTE: {
         RIB_ret_code_t ret;
         if ((ret = command_route(rtab, inputLine)) != RIB_NO_ERROR) {
-          printf("COMMAND ERROR: %d\n", ret);
+          printf("ERROR: %s\n", RIB_get_error_msg(ret));
         } else {
           printf("OK\n");
         }
@@ -570,7 +570,7 @@ int main(int argc, char* argv[]) {
       case DUMP: {
         RIB_ret_code_t ret;
         if ((ret = command_dump(rtab, inputLine)) != RIB_NO_ERROR) {
-          printf("COMMAND ERROR: %d\n", ret);
+          printf("ERROR: %s\n", RIB_get_error_msg(ret));
         } else {
           printf("OK\n");
         }
@@ -579,7 +579,7 @@ int main(int argc, char* argv[]) {
       case COMMIT: {
         int ret;
         if ((ret = commitRoutingTable(rtab, routingTableFile)) != 0 ) {
-          printf("COMMAND ERROR: %d\n", ret);
+          printf("ERROR: %s\n", RIB_get_error_msg(ret));
         } else {
           printf("OK\n");
         }
@@ -589,11 +589,11 @@ int main(int argc, char* argv[]) {
         RIB_free(rtab);
         rc = RIB_init(&rtab);
         if (rc != RIB_NO_ERROR) {
-          printf("COMMAND ERROR: %d\n", -1);
+          printf("ERROR: %d\n", -1);
           return rc;
         }
         if (parseRoutingTable(rtab, routingTableFile) != 0) {
-          printf("COMMAND ERROR: %d\n", -1);
+          printf("ERROR: %d\n", -1);
           RIB_free(rtab);
           return 1;
         }

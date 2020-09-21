@@ -613,3 +613,30 @@ RIB_ret_code_t RIB_match_ipv6(RIB* rtab, const char* destination, Route** route)
   return RIB_NO_ERROR;
   return RIB_NO_MATCH;
 }
+
+/**
+ * @brief returns the error message associated to the error code
+ * @param err
+ * @return char*
+ */
+
+const char* RIB_get_error_msg(const RIB_ret_code_t err) {
+  switch (err) {
+    case RIB_NO_ERROR:
+      return "The operation outcome was successful";
+    case RIB_BAD_ALLOC:
+      return "It was not possible to allocate memory for a RIB/Route object";
+    case RIB_DUP_RECORD:
+      return "A route with the provided addresses already exists in the routing table";
+    case RIB_INVALID_ADDRESS:
+      return "One of the addresses provided to the function is nor ipv4 nor ipv6";
+    case RIB_NO_MATCH:
+      return "No route could satisfy the query";
+    case RIB_NOT_EXISTS:
+      return "A route with the provided addresses doesn't exist in the routing table";
+    case RIB_UNINITIALIZED_RIB:
+      return "The RIB object is NULL or not correctly initialized";
+    default:
+      return "Uknown error";
+  }
+}

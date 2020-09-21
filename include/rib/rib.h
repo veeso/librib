@@ -28,7 +28,7 @@
 extern "C" {
 #endif
 
-#include <rib/route.h>
+#include "route.h"
 
 #include <stdlib.h>
 
@@ -71,6 +71,9 @@ RIB_ret_code_t RIB_find(RIB* rtab, const char* networkAddr, const char* netmask,
 RIB_ret_code_t RIB_match(RIB* rtab, const char* destination, Route** route);
 RIB_ret_code_t RIB_match_ipv4(RIB* rtab, const char* destination, Route** route);
 RIB_ret_code_t RIB_match_ipv6(RIB* rtab, const char* destination, Route** route);
+
+// Misc
+const char* RIB_get_error_msg(const RIB_ret_code_t err);
 
 #ifdef __cplusplus
 }
