@@ -32,7 +32,7 @@ extern "C" {
 
 #include <stdlib.h>
 
-#define RIB_LIB_VERSION "1.0.0"
+#define RIB_LIB_VERSION "1.0.1"
 
 #ifndef RIB_GIT_COMMIT
 #define RIB_GIT_COMMIT "??????"

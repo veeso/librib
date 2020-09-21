@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([librib], [1.0.0], [https://github.com/ChristianVisintin/librib])
+AC_INIT([librib], [1.0.1], [https://github.com/ChristianVisintin/librib])
 AC_CONFIG_MACRO_DIRS([m4])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 AC_CONFIG_SRCDIR([include/rib/rib.h])

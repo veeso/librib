@@ -4,7 +4,7 @@
 
 Developed by *Christian Visintin*
 
-Current Version 1.0.0
+Current Version 1.0.1 (21/09/2020)
 
 - [LibRIB](#librib)
   - [Build](#build)

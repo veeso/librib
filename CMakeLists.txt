@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
-project(libpymib VERSION 0.1.0)
+project(librib VERSION 1.0.1)
 
 execute_process(
   COMMAND git log -1 --format=%h
@@ -53,7 +53,7 @@ add_definitions("-DRIB_GIT_COMMIT=${GIT_COMMIT}")
 
 add_library(rib_shared SHARED ${RIB_SRC})
 set_target_properties(rib_shared PROPERTIES OUTPUT_NAME rib)
-set_target_properties(rib_shared PROPERTIES VERSION 1.0.0)
+set_target_properties(rib_shared PROPERTIES VERSION 1.0.1)
 add_library(rib_static STATIC ${RIB_SRC})
 set_target_properties(rib_static PROPERTIES OUTPUT_NAME rib)
 
