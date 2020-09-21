@@ -1,14 +1,46 @@
 # LibRIB
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-red.svg)](https://opensource.org/licenses/MIT) [![HitCount](http://hits.dwyl.io/ChristianVisintin/librib.svg)](http://hits.dwyl.io/ChristianVisintin/librib) [![Stars](https://img.shields.io/github/stars/ChristianVisintin/librib.svg)](https://github.com/ChristianVisintin/librib) [![Issues](https://img.shields.io/github/issues/ChristianVisintin/librib.svg)](https://github.com/ChristianVisintin/librib) [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/ChristianVisintin/librib/issues)
+[![License: MIT](https://img.shields.io/badge/License-MIT-teal.svg)](https://opensource.org/licenses/MIT) [![Stars](https://img.shields.io/github/stars/ChristianVisintin/librib.svg)](https://github.com/ChristianVisintin/librib) [![Issues](https://img.shields.io/github/issues/ChristianVisintin/librib.svg)](https://github.com/ChristianVisintin/librib/issues) [![Build](https://api.travis-ci.org/ChristianVisintin/librib.svg?branch=master)](https://travis-ci.org/ChristianVisintin/librib)
 
 Developed by *Christian Visintin*
 
 Current Version 1.0.0
 
+- [LibRIB](#librib)
+  - [Build](#build)
+    - [CMake](#cmake)
+    - [Autotools](#autotools)
+  - [Documentation](#documentation)
+    - [RIB](#rib)
+      - [RIB struct](#rib-struct)
+      - [Route struct](#route-struct)
+      - [Return codes](#return-codes)
+      - [RIB_init](#rib_init)
+      - [RIB_free](#rib_free)
+      - [RIB_add](#rib_add)
+      - [RIB_delete](#rib_delete)
+      - [RIB_update](#rib_update)
+      - [RIB_clear](#rib_clear)
+      - [RIB_find](#rib_find)
+      - [RIB_match](#rib_match)
+  - [Known Issues](#known-issues)
+  - [Changelog](#changelog)
+  - [License](#license)
+
 ---
 
 ## Build
+
+### CMake
+
+```sh
+mkdir build/
+cmake -DWITH_ROUTER=yes ..
+make
+make install
+```
+
+### Autotools
 
 ```sh
 ./autogen.sh
@@ -222,18 +254,10 @@ The route to use  is returned as a Route* pointer.
 
 ## Known Issues
 
-/
+None, as far as I know
+
+## Changelog
 
 ## License
 
-```txt
-MIT License
-
-Copyright (c) 2019 Christian Visintin
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-```
+View [LICENSE](LICENSE)

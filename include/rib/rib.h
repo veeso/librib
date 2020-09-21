@@ -34,6 +34,10 @@ extern "C" {
 
 #define RIB_LIB_VERSION "1.0.0"
 
+#ifndef RIB_GIT_COMMIT
+#define RIB_GIT_COMMIT "??????"
+#endif // RIB_GIT_COMMIT
+
 // Data types
 
 typedef struct RIB {

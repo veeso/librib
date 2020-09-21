@@ -1,0 +1,11 @@
+language: c
+dist: trusty
+os: linux
+compiler:
+  - gcc
+before_script:
+  - mkdir build/ && cd build/
+script:
+  - cmake -DWITH_ROUTER=yes ..
+  - make
+  - make install DESTDIR=./out/

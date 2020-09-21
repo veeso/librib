@@ -1,3 +1,3 @@
 AUTOMAKE_OPTIONS = foreign
-SUBDIRS = include src router
+SUBDIRS = include src
 ACLOCAL_AMFLAGS = -I m4

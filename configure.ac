@@ -30,5 +30,5 @@ AC_CHECK_FUNCS([memset strstr strtol])
 #Initialize LT for shared objects
 LT_INIT
 
-AC_CONFIG_FILES(Makefile include/Makefile include/rib/Makefile src/Makefile router/Makefile)
+AC_CONFIG_FILES(Makefile include/Makefile include/rib/Makefile src/Makefile src/router/Makefile src/rib/Makefile)
 AC_OUTPUT
