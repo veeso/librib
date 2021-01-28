@@ -1,6 +1,6 @@
 # LibRIB
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-teal.svg)](https://opensource.org/licenses/MIT) [![Stars](https://img.shields.io/github/stars/ChristianVisintin/librib.svg)](https://github.com/ChristianVisintin/librib) [![Issues](https://img.shields.io/github/issues/ChristianVisintin/librib.svg)](https://github.com/ChristianVisintin/librib/issues) [![Build](https://api.travis-ci.org/ChristianVisintin/librib.svg?branch=master)](https://travis-ci.org/ChristianVisintin/librib)
+[![License: MIT](https://img.shields.io/badge/License-MIT-teal.svg)](https://opensource.org/licenses/MIT) [![Stars](https://img.shields.io/github/stars/ChristianVisintin/librib.svg)](https://github.com/veeso/librib) [![Issues](https://img.shields.io/github/issues/ChristianVisintin/librib.svg)](https://github.com/veeso/librib/issues) [![Build](https://api.travis-ci.org/veeso/librib.svg?branch=master)](https://travis-ci.org/veeso/librib)
 
 Developed by *Christian Visintin*
 
