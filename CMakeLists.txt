@@ -47,7 +47,7 @@ if (HAVE_C11)
 else()
   set(CMAKE_C_STANDARD 99)
 endif(HAVE_C11)
-set(CMAKE_BUILD_TYPE DEBUG)
+// set(CMAKE_BUILD_TYPE DEBUG)
 
 add_definitions("-DRIB_GIT_COMMIT=${GIT_COMMIT}")
 
